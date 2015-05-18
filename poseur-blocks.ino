@@ -4,6 +4,7 @@
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ *
  *     1. Redistributions of source code must retain the above copyright
  *        notice, this list of conditions and the following disclaimer.
  *     2. Redistributions in binary form must reproduce the above copyright
@@ -123,7 +124,6 @@ int move(int mov, struct tetromino *tetr)
                 temp[i].x = tetr->blocks[i].x;
                 temp[i].y = tetr->blocks[i].y + 1;
             }
-
             pos.x = tetr->pos.x;
             pos.y = tetr->pos.y + 1;
 
@@ -134,7 +134,6 @@ int move(int mov, struct tetromino *tetr)
                 temp[i].x = tetr->blocks[i].x + 1;
                 temp[i].y = tetr->blocks[i].y;
             }
-
             pos.x = tetr->pos.x + 1;
             pos.y = tetr->pos.y;
 
@@ -145,7 +144,6 @@ int move(int mov, struct tetromino *tetr)
                 temp[i].x = -(tetr->blocks[i].y - tetr->pos.y) + tetr->pos.x;
                 temp[i].y = tetr->blocks[i].x - tetr->pos.x + tetr->pos.y;
             }
-            
             pos.x = tetr->pos.x;
             pos.y = tetr->pos.y;
 
@@ -200,6 +198,10 @@ int find_mapping(struct lcd_map *mapping, byte key)
 int insert_mapping(struct lcd_map *mapping, byte key)
 {
     int pos = mapping->max;
+
+    if (pos > 7) // Upper limit of array
+        return -1;
+
     mapping->lcd_char_map[pos] = key;
 
     mapping->max = pos + 1;
@@ -296,7 +298,8 @@ void print_to_lcd()
             key = compose_key(i, j);
             
             if (key == 0)
-            {    lcd.write(" ");
+            {   
+                lcd.write(" ");
                 continue;
             }
             
