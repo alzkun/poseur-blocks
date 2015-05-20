@@ -43,6 +43,9 @@
 unsigned long curr_time;
 unsigned long prev_time;
 
+int score;
+int base_pointer;
+
 typedef char game_matrix[N_ROWS][N_COLS];
 
 struct lcd_map
@@ -153,9 +156,9 @@ int move(int mov, struct tetromino *tetr)
     for (i=0; i<4; i++)
     {
         if (temp[i].x < 0  ||
-            temp[i].x > 31 ||
+            temp[i].x > base_pointer-1 ||
             temp[i].y < 0  ||
-            temp[i].y > 5)
+            temp[i].y > N_COLS-1)
                 return 1;
     }
 
@@ -199,7 +202,7 @@ int insert_mapping(struct lcd_map *mapping, byte key)
 {
     int pos = mapping->max;
 
-    if (pos > 7) // Upper limit of array
+    if (pos > N_LCD_CHAR-1) // Upper limit of array
         return -1;
 
     mapping->lcd_char_map[pos] = key;
@@ -271,7 +274,7 @@ void print_to_lcd()
     int index, i, j;
 
     // Create custom LCD's characters
-    for (i=0; i<N_ROWS; i+=2)
+    for (i=0; i<base_pointer; i+=2)
         for (j=0; j<N_COLS; j+=3)
         {
             key = compose_key(i, j);
@@ -295,6 +298,12 @@ void print_to_lcd()
     {
         for (i=0; i<N_ROWS; i+=2)
         {
+            if (i >= base_pointer)
+            {
+                lcd.write("$");
+                continue;
+            }
+
             key = compose_key(i, j);
             
             if (key == 0)
@@ -313,7 +322,7 @@ void print_to_lcd()
     }
 }
 
-void add_new_tetromino(int foo)
+int add_new_tetromino(int foo)
 {
     tetr.blocks[0].x = start_pos[foo].blocks[0].x;
     tetr.blocks[0].y = start_pos[foo].blocks[0].y;
@@ -328,12 +337,25 @@ void add_new_tetromino(int foo)
     tetr.type = start_pos[foo].type;
     tetr.pos.x = start_pos[foo].pos.x;
     tetr.pos.y = start_pos[foo].pos.y;
+
+    // Check space
+    if (matrix[tetr.blocks[0].x][tetr.blocks[0].y] != ' ' ||
+        matrix[tetr.blocks[1].x][tetr.blocks[1].y] != ' ' ||
+        matrix[tetr.blocks[2].x][tetr.blocks[2].y] != ' ' ||
+        matrix[tetr.blocks[3].x][tetr.blocks[3].y] != ' ')
+
+        return 1;
+    else
+        return 0;
 }
 
 void setup()
 {
     int i, j, mvm, foo;
     char cmd;
+
+    score = 0;
+    base_pointer = N_ROWS;
 
     randomSeed(millis());
     
@@ -425,8 +447,8 @@ void setup()
 
     /* Z-block */
     start_pos[6].type = 'Z';
-    start_pos[6].pos.x = 0;
-    start_pos[6].pos.y = 0;
+    start_pos[6].pos.x = 1;
+    start_pos[6].pos.y = 3;
     start_pos[6].dir = 0;
     start_pos[6].blocks[0].x = 0;
     start_pos[6].blocks[0].y = 2;
@@ -450,10 +472,48 @@ void setup()
     print_to_lcd();
 }
 
+int find_full_rows()
+{
+    int i, j;
+    int flag;
+
+    for (i = base_pointer-1; i>=0; i--)
+    {
+        flag = 0;
+
+        for (j=0; j<N_COLS; j++)
+            if (matrix[i][j] == ' ')
+                flag = 1;
+
+        if (flag == 0)
+            return i;
+    } 
+
+    return -1;
+}
+
+void mode_down_rows(int row)
+{
+    int i, j;
+
+    for (i=row; i>0; i--)
+        for (j=0; j<N_COLS; j++)
+            matrix[i][j] = matrix[i-1][j];
+
+    matrix[0][0] = ' ';
+    matrix[0][1] = ' ';
+    matrix[0][2] = ' ';
+    matrix[0][3] = ' ';
+}
+
 void loop()
 {
     int foo, ret;
     int mov = 0;
+    int row_index;
+
+    int i, j;
+    int flag = 0;
 
     curr_time = millis();
     int key_val = analogRead(A0);
@@ -488,7 +548,48 @@ void loop()
         
         if (move(DOWN, &tetr) == 1) // piece has reached the bottom
         {
-            add_new_tetromino(random(7));
+            while ((row_index = find_full_rows()) != -1)
+            {
+                mode_down_rows(row_index);
+
+                score += 10;
+            }
+
+            // Apply the rule
+            for (i=0; i<base_pointer;i++)
+            {
+                for (j=0; j<N_COLS; j++)
+                    if (matrix[i][j] != ' ')
+                    {
+                        flag = 1;
+
+                        if (base_pointer - i > 4)
+                        {
+                            base_pointer -= (base_pointer - i - 4);
+
+                            if (base_pointer % 2 != 0)
+                                base_pointer -= 1;
+                        }
+                        
+                        break;
+                    }
+
+                if (flag == 1)
+                    break;
+            }
+
+            ret = add_new_tetromino(random(7));
+
+            if (ret != 0)
+            {
+                // print score
+                lcd.clear();
+                lcd.print("Score: " );
+                lcd.print(score);
+
+                while(1)
+                    ;
+            }
 
             draw_tetromino(&tetr, tetr.type);
         }
