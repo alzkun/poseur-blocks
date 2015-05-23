@@ -40,6 +40,9 @@
 
 #define N_LCD_CHAR 8
 
+#define SOUND_NOTE 262
+#define SOUND_DURATION 100
+
 unsigned long curr_time;
 unsigned long prev_time;
 
@@ -508,7 +511,7 @@ void mode_down_rows(int row)
 
 void loop()
 {
-    int foo, ret;
+    int foo, ret, ret_mov;
     int mov = 0;
     int row_index;
 
@@ -535,7 +538,8 @@ void loop()
         {
             draw_tetromino(&tetr, tetr.type);
             print_to_lcd();
-            delay(200);
+            tone(8, SOUND_NOTE, SOUND_DURATION);
+            delay(100);
             return;
         }
     }
@@ -546,7 +550,7 @@ void loop()
     {
         prev_time = curr_time;
         
-        if (move(DOWN, &tetr) == 1) // piece has reached the bottom
+        if ((ret_mov = move(DOWN, &tetr)) == 1) // piece has reached the bottom
         {
             while ((row_index = find_full_rows()) != -1)
             {
@@ -595,5 +599,8 @@ void loop()
         }
         
         print_to_lcd();
+
+        if (ret_mov == 1)
+            tone(8, SOUND_NOTE, SOUND_DURATION);
     }
 }
