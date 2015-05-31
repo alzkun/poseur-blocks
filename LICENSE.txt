@@ -1,3 +1,11 @@
+Poseur-blocks is free software, published under the terms of a permissive
+BSD-style license (see below).
+
+There is absolutely NO WARRANTY, neither expressed nor implied, for all
+the files included in the project. Use at your own risk.
+
+-------------------------------------------------------------------------------
+
 Copyright (c) 2015, Alex Zen <me@alexzen.net>
 All rights reserved.
 
