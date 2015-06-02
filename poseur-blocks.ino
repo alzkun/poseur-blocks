@@ -62,6 +62,9 @@ game_matrix matrix;
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+/*
+ * Check if the char in input is "empty" ( == ' ' )
+ */
 int is_empty(char p)
 {
     if (p == ' ')
@@ -92,6 +95,9 @@ int max_line = N_ROWS + 1;
 
 struct tetromino start_pos[7];
 
+/*
+ * Draw the tetromino on the matrix of the game
+ */
 void draw_tetromino(struct tetromino *tetr, char val)
 {
     struct point bl;
@@ -105,6 +111,10 @@ void draw_tetromino(struct tetromino *tetr, char val)
     }
 }
 
+/*
+ * Move the tetromino.
+ * If collision occurs, return 1
+ */
 int move(int mov, struct tetromino *tetr)
 {
     int i;
@@ -165,7 +175,7 @@ int move(int mov, struct tetromino *tetr)
                 return 1;
     }
 
-    /* Move the tetramin */
+    /* Move the tetromino */
     draw_tetromino(tetr, ' ');
     
     /* Check for collisions */
@@ -191,6 +201,9 @@ int move(int mov, struct tetromino *tetr)
     return 0;
 }
 
+/*
+ * Search in the mapping table if the key is present
+ */
 int find_mapping(struct lcd_map *mapping, byte key)
 {
     int i;
@@ -201,6 +214,9 @@ int find_mapping(struct lcd_map *mapping, byte key)
     return -1;
 }
 
+/*
+ * Insert the key into the mapping table
+ */
 int insert_mapping(struct lcd_map *mapping, byte key)
 {
     int pos = mapping->max;
@@ -215,6 +231,9 @@ int insert_mapping(struct lcd_map *mapping, byte key)
     return pos;
 }
 
+/*
+ * Compose the key for the mapping table
+ */
 byte compose_key(int i, int j)
 {
     byte key = 0;
@@ -229,6 +248,9 @@ byte compose_key(int i, int j)
     return key;
 }
 
+/*
+ * Create a new char for the LCD screen
+ */
 void create_new_char(int i, int j, int index)
 {
     byte bt_1 = B00000;
@@ -267,7 +289,9 @@ void create_new_char(int i, int j, int index)
     return;
 }
 
-/* Draw the matrix on Arduino's LCD */
+/*
+ * Draw the matrix on Arduino's LCD
+ */
 void print_to_lcd()
 {
     struct lcd_map lcd_char_map;
@@ -275,6 +299,8 @@ void print_to_lcd()
 
     byte key = 0;
     int index, i, j;
+
+    //lcd.clear();
 
     // Create custom LCD's characters
     for (i=0; i<base_pointer; i+=2)
@@ -325,6 +351,9 @@ void print_to_lcd()
     }
 }
 
+/*
+ * Add a new tetromino on the game
+ */
 int add_new_tetromino(int foo)
 {
     tetr.blocks[0].x = start_pos[foo].blocks[0].x;
@@ -352,6 +381,9 @@ int add_new_tetromino(int foo)
         return 0;
 }
 
+/*
+ * Arduino's setup() function. It is called when the sketch starts
+ */
 void setup()
 {
     int i, j, mvm, foo;
@@ -475,6 +507,9 @@ void setup()
     print_to_lcd();
 }
 
+/*
+ * Return the first full row found
+ */
 int find_full_rows()
 {
     int i, j;
@@ -495,6 +530,9 @@ int find_full_rows()
     return -1;
 }
 
+/*
+ * Erase a row
+ */
 void mode_down_rows(int row)
 {
     int i, j;
@@ -509,6 +547,9 @@ void mode_down_rows(int row)
     matrix[0][3] = ' ';
 }
 
+/*
+ * Arduino's loop() function
+ */
 void loop()
 {
     int foo, ret, ret_mov;
