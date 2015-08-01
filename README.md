@@ -1,6 +1,6 @@
 ![alt tag](http://alexzen.github.io/poseur-blocks/poseur-blocks.jpg)
 
-Poseur Blocks is a simple Arduino project recreating a tetromino game on a 16x2 LCD screen. All components used for the project are taken from the official Arduino Starter Kit (http://www.arduino.cc/en/Main/ArduinoStarterKit).
+Poseur Blocks is a simple Arduino project recreating a tetromino game on a 16x2 LCD screen. All components used for the project are from the Arduino Starter Kit (http://www.arduino.cc/en/Main/ArduinoStarterKit).
 
 * 32x6 board
 * All seven tetromino pieces
